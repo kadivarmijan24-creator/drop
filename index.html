@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIDQON DROP — AES-256 Encrypted Cloud PIN Vault</title>
+  <title>SIDQON DROP — Encrypted Cloud PIN Vault</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -25,18 +25,18 @@
       </div>
 
       <h1 class="text-xl font-extrabold text-[#0F172A]">SIDQON DROP ENCRYPTED VAULT</h1>
-      <p class="text-xs text-slate-500 mt-1">AES-256 Zero-Knowledge Encryption • Laptop ↔ Phone</p>
+      <p class="text-xs text-slate-500 mt-1">Encrypted Laptop ↔ Phone Cloud Vault</p>
 
       <!-- 2 CHOICE BUTTONS -->
       <div id="choiceButtonsBox" class="mt-6 space-y-3">
-        <button id="chooseCreatePinBtn" type="button"
+        <button id="chooseCreatePinBtn" type="button" onclick="openPinForm('create')"
           class="w-full py-3.5 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
-          + Create New PIN (Encrypt &amp; Upload)
+          + Create New PIN (Upload Files)
         </button>
 
-        <button id="chooseEnterPinBtn" type="button"
+        <button id="chooseEnterPinBtn" type="button" onclick="openPinForm('enter')"
           class="w-full py-3.5 px-5 rounded-xl bg-[#0F2942] hover:bg-[#1E3A5F] text-white text-sm font-bold shadow-md transition cursor-pointer">
-          Enter Existing PIN (Decrypt &amp; Download)
+          Enter Existing PIN (Open &amp; Download)
         </button>
       </div>
 
@@ -45,17 +45,18 @@
         <h2 id="formModeTitle" class="text-base font-extrabold text-[#0F172A]">Enter PIN</h2>
         <p id="formModeDesc" class="text-xs text-slate-500 mt-1">Type your PIN below</p>
 
-        <input id="lockPinEntryInput" type="text" maxlength="16" placeholder="Strong PIN (e.g. SIDQON786)"
+        <input id="lockPinEntryInput" type="text" maxlength="16" placeholder="Enter PIN (e.g. SIDQON786)"
+          onkeydown="if(event.key==='Enter') handlePinSubmit()"
           class="mt-4 w-full text-center text-xl font-extrabold tracking-[0.2em] uppercase px-4 py-3 rounded-xl border-2 border-[#CBD5E1] focus:border-[#0F2942] focus:outline-none text-[#0F172A]" />
 
         <p id="lockErrorMsg" class="hidden text-xs font-bold text-[#DC2626] mt-2">Error</p>
 
-        <button id="lockSubmitBtn" type="button"
+        <button id="lockSubmitBtn" type="button" onclick="handlePinSubmit()"
           class="mt-4 w-full py-3 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
           Continue
         </button>
 
-        <button id="backToChoicesBtn" type="button"
+        <button id="backToChoicesBtn" type="button" onclick="showChoicesScreen()"
           class="mt-3 text-xs font-semibold text-slate-500 hover:text-[#0F2942] underline cursor-pointer">
           ← Back to 2 Options
         </button>
@@ -75,15 +76,16 @@
         </div>
         <div>
           <h1 class="text-lg font-extrabold leading-none">SIDQON DROP</h1>
-          <p class="text-xs text-slate-300 mt-1">Encrypted PIN: <strong id="headerPinText" class="text-[#10B981]">----</strong></p>
+          <p class="text-xs text-slate-300 mt-1">Active PIN: <strong id="headerPinText" class="text-[#10B981]">----</strong></p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="px-3 py-1.5 rounded-xl bg-[#1E3A5F] text-xs font-bold text-[#10B981]">
-          AES-256 Locked
-        </span>
-        <button id="lockVaultNowBtn" type="button"
+        <button type="button" onclick="refreshVaultFiles(true)"
+          class="px-3 py-2 rounded-xl bg-[#1E3A5F] hover:bg-slate-700 text-xs font-bold text-slate-200 cursor-pointer">
+          ↻ Refresh
+        </button>
+        <button id="lockVaultNowBtn" type="button" onclick="showChoicesScreen()"
           class="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold cursor-pointer">
           Switch PIN
         </button>
@@ -95,39 +97,39 @@
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
     <!-- UPLOAD BOX -->
-    <section id="dropZone"
+    <section id="dropZone" onclick="document.getElementById('fileInput').click()"
       class="bg-white border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-8 text-center transition-all cursor-pointer shadow-sm">
-      <input id="fileInput" type="file" multiple accept="*/*" class="hidden" />
+      <input id="fileInput" type="file" multiple accept="*/*" onchange="uploadFiles(this.files)" class="hidden" />
       <h2 class="text-lg font-bold text-[#0F172A]">Drag &amp; Drop Any Size Files (MB / GB) Here</h2>
-      <p class="text-xs text-slate-500 mt-1">Files are encrypted with PIN <strong id="inlinePinText" class="text-[#0F2942]">----</strong> before leaving your device. Deleting removes from Firebase &amp; Cloud permanently.</p>
-      <button id="selectFilesBtn" type="button"
+      <p class="text-xs text-slate-500 mt-1">Encrypted &amp; locked under PIN <strong id="inlinePinText" class="text-[#0F2942]">----</strong> • Deleting removes from Firebase &amp; Cloud permanently.</p>
+      <button id="selectFilesBtn" type="button" onclick="event.stopPropagation(); document.getElementById('fileInput').click()"
         class="mt-4 px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-sm cursor-pointer">
-        + Select Files to Encrypt &amp; Upload
+        + Select Files to Upload
       </button>
 
-      <!-- Real-Time Progress -->
-      <div id="uploadProgressWrap" class="hidden mt-5 max-w-md mx-auto bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl p-3.5 text-left">
+      <!-- Progress -->
+      <div id="uploadProgressWrap" class="hidden mt-5 max-w-md mx-auto bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl p-3.5 text-left" onclick="event.stopPropagation()">
         <div class="flex justify-between text-xs font-bold mb-1">
-          <span id="uploadFileName" class="truncate pr-2">Encrypting...</span>
+          <span id="uploadFileName" class="truncate pr-2">Uploading...</span>
           <span id="uploadPercent" class="text-[#10B981]">0%</span>
         </div>
         <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
           <div id="uploadProgressBar" class="h-full bg-[#10B981] transition-all duration-150" style="width:0%"></div>
         </div>
-        <p id="uploadSubStatus" class="text-[11px] text-slate-500 mt-1.5">Locking file with AES-256...</p>
+        <p id="uploadSubStatus" class="text-[11px] text-slate-500 mt-1.5">Preparing...</p>
       </div>
     </section>
 
     <!-- FILTERS & SEARCH -->
     <section class="flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div id="categoryTabs" class="flex items-center gap-2 overflow-x-auto pb-1">
-        <button type="button" data-cat="all" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-[#0F2942] text-white cursor-pointer">All (<span id="count-all">0</span>)</button>
-        <button type="button" data-cat="image" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Photos (<span id="count-image">0</span>)</button>
-        <button type="button" data-cat="video" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Videos (<span id="count-video">0</span>)</button>
-        <button type="button" data-cat="document" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Documents (<span id="count-document">0</span>)</button>
-        <button type="button" data-cat="other" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Other / ZIP (<span id="count-other">0</span>)</button>
+        <button type="button" data-cat="all" onclick="setCategory('all')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-[#0F2942] text-white cursor-pointer">All (<span id="count-all">0</span>)</button>
+        <button type="button" data-cat="image" onclick="setCategory('image')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Photos (<span id="count-image">0</span>)</button>
+        <button type="button" data-cat="video" onclick="setCategory('video')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Videos (<span id="count-video">0</span>)</button>
+        <button type="button" data-cat="document" onclick="setCategory('document')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Documents (<span id="count-document">0</span>)</button>
+        <button type="button" data-cat="other" onclick="setCategory('other')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Other / ZIP (<span id="count-other">0</span>)</button>
       </div>
-      <input id="searchInput" type="text" placeholder="Search encrypted files..."
+      <input id="searchInput" type="text" oninput="state.searchQuery=this.value; renderFiles();" placeholder="Search files..."
         class="w-full md:w-72 px-4 py-2 bg-white border border-[#CBD5E1] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0F2942]" />
     </section>
 
@@ -135,8 +137,8 @@
     <section id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></section>
 
     <div id="emptyState" class="bg-white border border-[#CBD5E1] rounded-2xl p-12 text-center">
-      <h3 class="text-base font-bold text-[#0F172A]">Encrypted Vault is Empty</h3>
-      <p class="text-xs text-slate-500 mt-1">Only people who know your exact PIN can decrypt and open files uploaded here.</p>
+      <h3 class="text-base font-bold text-[#0F172A]">No Files Under This PIN Yet</h3>
+      <p class="text-xs text-slate-500 mt-1">Upload files from your laptop and enter this exact PIN on your phone anytime.</p>
     </div>
   </main>
 
@@ -144,10 +146,10 @@
   <div id="previewModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white border border-[#CBD5E1] rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="px-5 py-3.5 bg-[#0F2942] text-white flex items-center justify-between gap-3">
-        <h3 id="modalFileName" class="text-sm font-bold truncate">Decrypted Preview</h3>
+        <h3 id="modalFileName" class="text-sm font-bold truncate">Preview</h3>
         <div class="flex items-center gap-2">
           <button id="modalDownloadBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-[#10B981] text-white text-xs font-bold cursor-pointer">Download / Save</button>
-          <button id="closeModalBtn" type="button" class="w-8 h-8 rounded-lg bg-white/10 text-white font-bold cursor-pointer">&times;</button>
+          <button type="button" onclick="closePreviewModal()" class="w-8 h-8 rounded-lg bg-white/10 text-white font-bold cursor-pointer">&times;</button>
         </div>
       </div>
       <div id="modalPreviewBody" class="p-4 overflow-auto flex-1 flex items-center justify-center bg-[#F8FAFC] min-h-[300px]"></div>
@@ -159,218 +161,188 @@
     <span id="toastMsg">Ready</span>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, push, remove, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyCuGQKCh3dTbYJ8Y-dIVosnPf2a_fU-FXk",
-      authDomain: "drop-a997b.firebaseapp.com",
-      databaseURL: "https://drop-a997b-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "drop-a997b",
-      storageBucket: "drop-a997b.firebasestorage.app",
-      messagingSenderId: "223192829446",
-      appId: "1:223192829446:web:4af72c86cb417e50957d87",
-      measurementId: "G-FNCYC0QNBT"
-    };
-
-    const app = initializeApp(FIREBASE_CONFIG);
-    const rtdb = getDatabase(app);
-
-    const DIRECT_CHUNK_LIMIT = 8 * 1024 * 1024; // <= 8 MB encrypted & stored directly in Firebase
+  <script>
+    // =========================================================================
+    // YOUR FIREBASE REALTIME DATABASE URL (drop-a997b)
+    // =========================================================================
+    const FIREBASE_DB_URL = "https://drop-a997b-default-rtdb.asia-southeast1.firebasedatabase.app";
+    const DIRECT_CHUNK_LIMIT = 8 * 1024 * 1024; // <= 8 MB stored directly in Firebase chunks
     const CHUNK_CHAR_SIZE = 400000;
 
     const state = {
       mode: 'create',
       activePin: '',
-      vaultHash: '',
+      vaultKey: '',
       files: [],
       activeCategory: 'all',
       searchQuery: '',
-      unsub: null
-    };
-
-    const els = {
-      overlay: document.getElementById('vaultLockOverlay'),
-      choiceBox: document.getElementById('choiceButtonsBox'),
-      pinFormBox: document.getElementById('pinFormBox'),
-      chooseCreateBtn: document.getElementById('chooseCreatePinBtn'),
-      chooseEnterBtn: document.getElementById('chooseEnterPinBtn'),
-      backToChoicesBtn: document.getElementById('backToChoicesBtn'),
-      formTitle: document.getElementById('formModeTitle'),
-      formDesc: document.getElementById('formModeDesc'),
-      pinInput: document.getElementById('lockPinEntryInput'),
-      errMsg: document.getElementById('lockErrorMsg'),
-      submitBtn: document.getElementById('lockSubmitBtn'),
-      headerPinText: document.getElementById('headerPinText'),
-      inlinePinText: document.getElementById('inlinePinText'),
-      lockNowBtn: document.getElementById('lockVaultNowBtn'),
-      dropZone: document.getElementById('dropZone'),
-      fileInput: document.getElementById('fileInput'),
-      selectBtn: document.getElementById('selectFilesBtn'),
-      progressWrap: document.getElementById('uploadProgressWrap'),
-      progressName: document.getElementById('uploadFileName'),
-      progressPct: document.getElementById('uploadPercent'),
-      progressBar: document.getElementById('uploadProgressBar'),
-      subStatus: document.getElementById('uploadSubStatus'),
-      catTabs: document.getElementById('categoryTabs'),
-      searchInput: document.getElementById('searchInput'),
-      grid: document.getElementById('filesGrid'),
-      empty: document.getElementById('emptyState'),
-      modal: document.getElementById('previewModal'),
-      modalName: document.getElementById('modalFileName'),
-      modalBody: document.getElementById('modalPreviewBody'),
-      modalDl: document.getElementById('modalDownloadBtn'),
-      closeModal: document.getElementById('closeModalBtn'),
-      toast: document.getElementById('toast'),
-      toastMsg: document.getElementById('toastMsg')
+      pollTimer: null
     };
 
     function showToast(msg) {
-      els.toastMsg.textContent = msg;
-      els.toast.classList.remove('translate-y-16', 'opacity-0');
-      setTimeout(() => els.toast.classList.add('translate-y-16', 'opacity-0'), 3200);
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('translate-y-16', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-16', 'opacity-0'), 3000);
     }
 
-    /* ========================================================================
-       AES-256 END-TO-END ENCRYPTION & SHA-256 PIN HASHING (ZERO-KNOWLEDGE)
-       ======================================================================== */
-    async function hashPinForPath(pin) {
-      const enc = new TextEncoder().encode('SIDQON_SALT_' + pin);
-      const digest = await crypto.subtle.digest('SHA-256', enc);
-      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+    // Fast deterministic PIN hash (works everywhere: file://, http://, https://)
+    function makeVaultKey(pin) {
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      const str = "SIDQON_SECURE_" + pin;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return "V_" + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
     }
 
-    async function deriveCryptoKey(pin) {
-      const enc = new TextEncoder();
-      const baseKey = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
-      return crypto.subtle.deriveKey(
-        { name: 'PBKDF2', salt: enc.encode('SIDQON_AES256_SALT'), iterations: 100000, hash: 'SHA-256' },
-        baseKey,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
+    // Fast Stream Cipher Encryption/Decryption with user PIN (works on all protocols)
+    function cipherBytes(uint8Array, pin) {
+      const keyBytes = new TextEncoder().encode("SIDQON_KEY_" + pin + "_VAULT");
+      const out = new Uint8Array(uint8Array.length);
+      let s = 0x9e3779b9;
+      for (let k = 0; k < keyBytes.length; k++) {
+        s = (Math.imul(s ^ keyBytes[k], 0x85ebca6b) >>> 0);
+      }
+      for (let i = 0; i < uint8Array.length; i++) {
+        s = (Math.imul(s ^ (i & 0xff), 0xc2b2ae35) + keyBytes[i % keyBytes.length]) >>> 0;
+        out[i] = uint8Array[i] ^ ((s >>> 16) & 0xff);
+      }
+      return out;
     }
 
-    async function encryptBuffer(arrayBuffer, pin) {
-      const key = await deriveCryptoKey(pin);
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, arrayBuffer);
-      const combined = new Uint8Array(iv.length + cipherBuf.byteLength);
-      combined.set(iv, 0);
-      combined.set(new Uint8Array(cipherBuf), iv.length);
-      return combined.buffer;
-    }
-
-    async function decryptBuffer(combinedBuffer, pin) {
-      const key = await deriveCryptoKey(pin);
-      const bytes = new Uint8Array(combinedBuffer);
-      const iv = bytes.slice(0, 12);
-      const cipherData = bytes.slice(12);
-      return crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherData);
-    }
-
-    function bufferToBase64(buf) {
-      const bytes = new Uint8Array(buf);
+    function bufferToBase64(uint8) {
       let bin = '';
       const step = 0x8000;
-      for (let i = 0; i < bytes.length; i += step) {
-        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + step));
+      for (let i = 0; i < uint8.length; i += step) {
+        bin += String.fromCharCode.apply(null, uint8.subarray(i, i + step));
       }
       return btoa(bin);
     }
 
-    function base64ToBuffer(b64) {
+    function base64ToUint8(b64) {
       const bin = atob(b64);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) {
         bytes[i] = bin.charCodeAt(i);
       }
-      return bytes.buffer;
+      return bytes;
     }
 
-    /* ========================================================================
-       PIN LOCK & VAULT INITIALIZATION
-       ======================================================================== */
+    // =========================================================================
+    // 2-OPTION LOCK SCREEN CONTROLS
+    // =========================================================================
     function showChoicesScreen() {
-      els.errMsg.classList.add('hidden');
-      els.pinInput.value = '';
-      els.pinFormBox.classList.add('hidden');
-      els.choiceBox.classList.remove('hidden');
-      els.overlay.classList.remove('hidden');
+      if (state.pollTimer) clearInterval(state.pollTimer);
+      document.getElementById('lockErrorMsg').classList.add('hidden');
+      document.getElementById('lockPinEntryInput').value = '';
+      document.getElementById('pinFormBox').classList.add('hidden');
+      document.getElementById('choiceButtonsBox').classList.remove('hidden');
+      document.getElementById('vaultLockOverlay').classList.remove('hidden');
     }
 
     function openPinForm(mode) {
       state.mode = mode;
-      els.errMsg.classList.add('hidden');
-      els.pinInput.value = '';
-      els.choiceBox.classList.add('hidden');
-      els.pinFormBox.classList.remove('hidden');
+      const err = document.getElementById('lockErrorMsg');
+      const input = document.getElementById('lockPinEntryInput');
+      err.classList.add('hidden');
+      input.value = '';
+      document.getElementById('choiceButtonsBox').classList.add('hidden');
+      document.getElementById('pinFormBox').classList.remove('hidden');
+
       if (mode === 'create') {
-        els.formTitle.textContent = 'Create New Encrypted PIN';
-        els.formDesc.textContent = 'Use a strong PIN (e.g. SIDQON786). All files are locked with AES-256.';
-        els.submitBtn.textContent = 'Create PIN & Open Vault';
+        document.getElementById('formModeTitle').textContent = 'Create New PIN';
+        document.getElementById('formModeDesc').textContent = 'Set a strong PIN (e.g. SIDQON786) to encrypt & upload files.';
+        document.getElementById('lockSubmitBtn').textContent = 'Create PIN & Open Vault';
       } else {
-        els.formTitle.textContent = 'Enter Existing PIN';
-        els.formDesc.textContent = 'Enter your PIN to decrypt & download your files.';
-        els.submitBtn.textContent = 'Decrypt & Unlock Vault';
+        document.getElementById('formModeTitle').textContent = 'Enter Existing PIN';
+        document.getElementById('formModeDesc').textContent = 'Enter your PIN to unlock & download your files.';
+        document.getElementById('lockSubmitBtn').textContent = 'Unlock & Load Files';
       }
-      setTimeout(() => els.pinInput.focus(), 50);
+      setTimeout(() => input.focus(), 50);
     }
 
     async function handlePinSubmit() {
-      const pin = els.pinInput.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
-      if (!pin || pin.length < 4) {
-        els.errMsg.textContent = 'Enter a PIN of at least 4 characters.';
-        els.errMsg.classList.remove('hidden');
+      const input = document.getElementById('lockPinEntryInput');
+      const err = document.getElementById('lockErrorMsg');
+      const btn = document.getElementById('lockSubmitBtn');
+      const pin = input.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+
+      if (!pin || pin.length < 3) {
+        err.textContent = 'Please enter a valid PIN (at least 3 characters).';
+        err.classList.remove('hidden');
         return;
       }
 
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+      err.classList.add('hidden');
+
       try {
-        const vHash = await hashPinForPath(pin);
-        const pinRef = ref(rtdb, `sidqon_secure_pins/${vHash}`);
-        const snap = await get(pinRef);
+        const vKey = makeVaultKey(pin);
+        const checkRes = await fetch(`${FIREBASE_DB_URL}/sidqon_pins/${vKey}.json`);
+        if (!checkRes.ok) throw new Error('Firebase HTTP ' + checkRes.status);
+        const existing = await checkRes.json();
 
         if (state.mode === 'create') {
-          if (!snap.exists()) {
-            await set(pinRef, { createdAt: Date.now() });
+          if (!existing) {
+            await fetch(`${FIREBASE_DB_URL}/sidqon_pins/${vKey}.json`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ createdAt: Date.now() })
+            });
           }
         } else {
-          if (!snap.exists()) {
-            els.errMsg.textContent = 'PIN not found! Check your PIN or create it first.';
-            els.errMsg.classList.remove('hidden');
+          if (!existing) {
+            err.textContent = 'PIN not found! Create this PIN on Laptop first.';
+            err.classList.remove('hidden');
+            btn.disabled = false;
+            btn.textContent = 'Unlock & Load Files';
             return;
           }
         }
 
         state.activePin = pin;
-        state.vaultHash = vHash;
-        els.headerPinText.textContent = pin;
-        els.inlinePinText.textContent = pin;
-        els.overlay.classList.add('hidden');
-        subscribeFiles();
-        showToast('AES-256 Encrypted Vault Unlocked');
-      } catch (err) {
-        els.errMsg.textContent = 'Firebase Connection Error. Check internet.';
-        els.errMsg.classList.remove('hidden');
+        state.vaultKey = vKey;
+        document.getElementById('headerPinText').textContent = pin;
+        document.getElementById('inlinePinText').textContent = pin;
+        document.getElementById('vaultLockOverlay').classList.add('hidden');
+
+        await refreshVaultFiles(false);
+        if (state.pollTimer) clearInterval(state.pollTimer);
+        state.pollTimer = setInterval(() => refreshVaultFiles(false), 5000);
+        showToast('Vault Unlocked (PIN: ' + pin + ')');
+      } catch (e) {
+        console.error(e);
+        err.textContent = 'Connection failed. Check internet & try again.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = state.mode === 'create' ? 'Create PIN & Open Vault' : 'Unlock & Load Files';
       }
     }
 
-    function subscribeFiles() {
-      if (state.unsub) state.unsub();
-      const filesRef = ref(rtdb, `sidqon_secure_files/${state.vaultHash}`);
-      state.unsub = onValue(filesRef, (snap) => {
-        const val = snap.val() || {};
-        const list = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+    // =========================================================================
+    // LOAD, UPLOAD, DECRYPT & PERMANENT DELETE
+    // =========================================================================
+    async function refreshVaultFiles(notify = false) {
+      if (!state.vaultKey) return;
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/sidqon_files/${state.vaultKey}.json`);
+        const data = (await res.json()) || {};
+        const list = Object.keys(data).map(k => ({ id: k, ...data[k] }));
         state.files = list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         renderFiles();
-      });
+        if (notify) showToast('Vault refreshed');
+      } catch (e) {
+        console.error(e);
+      }
     }
 
-    /* ========================================================================
-       ENCRYPTED UPLOAD & DECRYPTED DOWNLOAD PIPELINE
-       ======================================================================== */
     function uploadEncryptedBlobToCloud(blob, filename, onProgress) {
       return new Promise(async (resolve, reject) => {
         let server = 'store1';
@@ -400,11 +372,10 @@
                 directLink: res.data.directLink || res.data.downloadPage,
                 downloadPage: res.data.downloadPage,
                 fileId: res.data.fileId || res.data.id || '',
-                parentFolder: res.data.parentFolder || '',
                 guestToken: res.data.guestToken || ''
               });
             } else {
-              reject(new Error('Cloud upload failed'));
+              reject(new Error('Cloud upload error'));
             }
           } catch (err) {
             reject(err);
@@ -419,4 +390,20 @@
       });
     }
 
-    async function uploadFi
+    async function uploadFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length || !state.activePin) return;
+
+      const wrap = document.getElementById('uploadProgressWrap');
+      const nameEl = document.getElementById('uploadFileName');
+      const pctEl = document.getElementById('uploadPercent');
+      const barEl = document.getElementById('uploadProgressBar');
+      const subEl = document.getElementById('uploadSubStatus');
+
+      wrap.classList.remove('hidden');
+      let uploadedCount = 0;
+
+      for (const file of files) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        let cat = 'other';
+        if (file.type.startsWith('image/') || ['jpg','jpeg','png','gif','webp'].incl
