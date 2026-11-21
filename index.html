@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIDQON DROP — Custom PIN Protected Vault</title>
+  <title>SIDQON DROP — Custom PIN Vault</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body { background-color: #F8FAFC; color: #0F172A; margin: 0; }
-    .dropzone-active { border-color: #10B981 !important; background-color: #ECFDF5 !important; transform: scale(1.01); }
+    .dropzone-active { border-color: #10B981 !important; background-color: #ECFDF5 !important; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- PIN LOCK / SETUP OVERLAY -->
-  <div id="vaultLockOverlay" class="fixed inset-0 z-50 bg-[#0F2942]/95 backdrop-blur-md flex items-center justify-center p-4">
+  <!-- FIRST SCREEN: 2 OPTIONS (CREATE PIN vs ENTER WITH PIN) -->
+  <div id="vaultLockOverlay" class="fixed inset-0 z-50 bg-[#0F2942] flex items-center justify-center p-4">
     <div class="bg-white border border-[#CBD5E1] rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-[#10B981] text-white flex items-center justify-center shadow-md mb-4">
         <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
@@ -23,23 +23,43 @@
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
       </div>
-      <h2 id="lockScreenTitle" class="text-xl font-extrabold text-[#0F172A]">Set Your Vault PIN</h2>
-      <p id="lockScreenDesc" class="text-xs sm:text-sm text-slate-500 mt-1.5">
-        Create a private PIN. Anyone opening this link must enter your PIN to unlock and access files.
-      </p>
-      <div class="mt-5">
-        <input id="lockPinEntryInput" type="password" inputmode="numeric" maxlength="12" placeholder="Enter PIN (e.g. 7860)"
-          class="w-full text-center text-lg font-extrabold tracking-[0.25em] uppercase px-4 py-3 rounded-xl border-2 border-[#CBD5E1] focus:border-[#0F2942] focus:outline-none text-[#0F172A]" />
-        <p id="lockErrorMsg" class="hidden text-xs font-bold text-[#DC2626] mt-2">Incorrect PIN. Try again.</p>
+
+      <h1 class="text-xl font-extrabold text-[#0F172A]">SIDQON DROP VAULT</h1>
+      <p class="text-xs text-slate-500 mt-1">Choose an option below to continue</p>
+
+      <!-- STEP 1: TWO CLEAR CHOICE BUTTONS -->
+      <div id="choiceButtonsBox" class="mt-6 space-y-3">
+        <button id="chooseCreatePinBtn" type="button"
+          class="w-full py-3.5 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer flex items-center justify-center gap-2">
+          <span>+ Create New PIN (Upload Files)</span>
+        </button>
+
+        <button id="chooseEnterPinBtn" type="button"
+          class="w-full py-3.5 px-5 rounded-xl bg-[#0F2942] hover:bg-[#1E3A5F] text-white text-sm font-bold shadow-md transition cursor-pointer flex items-center justify-center gap-2">
+          <span>Enter Existing PIN (Open &amp; Download)</span>
+        </button>
       </div>
-      <button id="lockSubmitBtn" type="button"
-        class="mt-5 w-full py-3 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
-        Set PIN &amp; Open Vault
-      </button>
-      <button id="resetPinOptionBtn" type="button"
-        class="hidden mt-3 text-xs font-semibold text-slate-400 hover:text-[#0F2942] underline cursor-pointer">
-        Switch / Create New Vault PIN
-      </button>
+
+      <!-- STEP 2: PIN INPUT FORM (SHOWN AFTER CHOOSING AN OPTION) -->
+      <div id="pinFormBox" class="hidden mt-5">
+        <h2 id="formModeTitle" class="text-base font-extrabold text-[#0F172A]">Enter PIN</h2>
+        <p id="formModeDesc" class="text-xs text-slate-500 mt-1">Type your PIN below</p>
+
+        <input id="lockPinEntryInput" type="text" maxlength="12" placeholder="Enter PIN (e.g. 7860)"
+          class="mt-4 w-full text-center text-xl font-extrabold tracking-[0.22em] uppercase px-4 py-3 rounded-xl border-2 border-[#CBD5E1] focus:border-[#0F2942] focus:outline-none text-[#0F172A]" />
+
+        <p id="lockErrorMsg" class="hidden text-xs font-bold text-[#DC2626] mt-2">Error message</p>
+
+        <button id="lockSubmitBtn" type="button"
+          class="mt-4 w-full py-3 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
+          Continue
+        </button>
+
+        <button id="backToChoicesBtn" type="button"
+          class="mt-3 text-xs font-semibold text-slate-500 hover:text-[#0F2942] underline cursor-pointer">
+          ← Back to 2 Options
+        </button>
+      </div>
     </div>
   </div>
 
@@ -55,33 +75,18 @@
           </svg>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg sm:text-xl font-extrabold leading-none">SIDQON DROP</h1>
-            <span id="deviceBadge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/15 text-slate-200">Device</span>
-          </div>
-          <p class="text-xs text-slate-300 mt-1">PIN-Protected File &amp; Document Vault</p>
+          <h1 class="text-lg font-extrabold leading-none">SIDQON DROP</h1>
+          <p class="text-xs text-slate-300 mt-1">Active Vault PIN: <strong id="headerPinText" class="text-[#10B981]">----</strong></p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 flex-wrap">
-        <div class="flex items-center bg-[#1E3A5F] rounded-xl p-1 border border-white/15">
-          <span class="text-[11px] font-semibold text-slate-300 pl-2.5 pr-1.5">PIN:</span>
-          <input id="vaultPinInput" type="text" maxlength="12" value="7860"
-            class="w-24 bg-[#0F2942] text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg border border-white/10 focus:outline-none focus:border-[#10B981]" />
-          <button id="switchVaultBtn" type="button"
-            class="ml-1 px-2.5 py-1.5 rounded-lg bg-[#0F2942] hover:bg-slate-800 text-white text-xs font-bold border border-white/15 cursor-pointer">
-            Set PIN
-          </button>
-        </div>
-
+      <div class="flex items-center gap-2">
+        <span id="storageStatsBadge" class="px-3 py-1.5 rounded-xl bg-[#1E3A5F] text-xs font-bold text-white">
+          0 Files
+        </span>
         <button id="lockVaultNowBtn" type="button"
-          class="px-3 py-2 rounded-xl bg-[#1E3A5F] hover:bg-slate-700 text-white text-xs font-bold border border-white/15 cursor-pointer">
-          Lock
-        </button>
-
-        <button id="copyVaultBtn" type="button"
-          class="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold shadow-sm cursor-pointer">
-          Copy Share Link
+          class="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold cursor-pointer">
+          Switch / Exit PIN
         </button>
       </div>
     </div>
@@ -90,22 +95,12 @@
   <!-- MAIN WORKSPACE -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <div class="bg-white border border-[#CBD5E1] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-      <div class="text-xs sm:text-sm text-slate-600">
-        <span class="font-bold text-[#0F172A]">Active Vault PIN:</span>
-        <strong id="displayPinInline" class="text-[#0F2942] bg-slate-100 px-2 py-0.5 rounded">7860</strong> — Share the link and PIN so others can unlock &amp; download.
-      </div>
-      <span id="storageStatsBadge" class="px-3 py-1.5 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#0F172A]">
-        0 Files • 0 B
-      </span>
-    </div>
-
     <!-- UPLOAD BOX -->
     <section id="dropZone"
       class="bg-white border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-8 text-center transition-all cursor-pointer shadow-sm">
       <input id="fileInput" type="file" multiple accept="*/*" class="hidden" />
       <h2 class="text-lg font-bold text-[#0F172A]">Drag &amp; Drop Photos, Videos, PDFs, or Documents Here</h2>
-      <p class="text-xs text-slate-500 mt-1">All file types supported (Images, Videos, PDF, Word, Excel, ZIP, APK)</p>
+      <p class="text-xs text-slate-500 mt-1">Files uploaded here will be locked under PIN <strong id="inlinePinText" class="text-[#0F2942]">----</strong></p>
       <button id="selectFilesBtn" type="button"
         class="mt-4 px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-sm cursor-pointer">
         + Select Files to Upload
@@ -129,8 +124,8 @@
     <section id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></section>
 
     <div id="emptyState" class="bg-white border border-[#CBD5E1] rounded-2xl p-12 text-center">
-      <h3 class="text-base font-bold text-[#0F172A]">Your Vault is Empty</h3>
-      <p class="text-xs text-slate-500 mt-1">Upload any photo, video, or document above to store it in this PIN-protected vault.</p>
+      <h3 class="text-base font-bold text-[#0F172A]">No Files in This PIN Yet</h3>
+      <p class="text-xs text-slate-500 mt-1">Upload any photo, video, or document above.</p>
     </div>
   </main>
 
@@ -154,15 +149,12 @@
   </div>
 
   <script>
-    const SAVED_PIN_KEY = 'sidqon_drop_owner_pin';
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const deviceLabel = isMobile ? 'Phone' : 'Laptop';
-    document.getElementById('deviceBadge').textContent = deviceLabel;
+    const PINS_LIST_KEY = 'sidqon_created_pins_v1';
+    let createdPins = JSON.parse(localStorage.getItem(PINS_LIST_KEY) || '[]');
 
-    let savedPin = localStorage.getItem(SAVED_PIN_KEY) || '';
     const state = {
-      vaultPin: savedPin || '7860',
-      requiredPin: savedPin,
+      mode: 'create', // 'create' | 'enter'
+      activePin: '',
       files: [],
       activeCategory: 'all',
       searchQuery: ''
@@ -170,18 +162,22 @@
 
     const els = {
       overlay: document.getElementById('vaultLockOverlay'),
-      lockTitle: document.getElementById('lockScreenTitle'),
-      lockDesc: document.getElementById('lockScreenDesc'),
-      lockInput: document.getElementById('lockPinEntryInput'),
-      lockErr: document.getElementById('lockErrorMsg'),
-      lockBtn: document.getElementById('lockSubmitBtn'),
-      resetBtn: document.getElementById('resetPinOptionBtn'),
-      lockNowBtn: document.getElementById('lockVaultNowBtn'),
-      pinInput: document.getElementById('vaultPinInput'),
-      setPinBtn: document.getElementById('switchVaultBtn'),
-      copyBtn: document.getElementById('copyVaultBtn'),
-      inlinePin: document.getElementById('displayPinInline'),
+      choiceBox: document.getElementById('choiceButtonsBox'),
+      pinFormBox: document.getElementById('pinFormBox'),
+      chooseCreateBtn: document.getElementById('chooseCreatePinBtn'),
+      chooseEnterBtn: document.getElementById('chooseEnterPinBtn'),
+      backToChoicesBtn: document.getElementById('backToChoicesBtn'),
+      formTitle: document.getElementById('formModeTitle'),
+      formDesc: document.getElementById('formModeDesc'),
+      pinInput: document.getElementById('lockPinEntryInput'),
+      errMsg: document.getElementById('lockErrorMsg'),
+      submitBtn: document.getElementById('lockSubmitBtn'),
+
+      headerPinText: document.getElementById('headerPinText'),
+      inlinePinText: document.getElementById('inlinePinText'),
       statsBadge: document.getElementById('storageStatsBadge'),
+      lockNowBtn: document.getElementById('lockVaultNowBtn'),
+
       dropZone: document.getElementById('dropZone'),
       fileInput: document.getElementById('fileInput'),
       selectBtn: document.getElementById('selectFilesBtn'),
@@ -201,53 +197,74 @@
     function showToast(msg) {
       els.toastMsg.textContent = msg;
       els.toast.classList.remove('translate-y-16', 'opacity-0');
-      setTimeout(() => els.toast.classList.add('translate-y-16', 'opacity-0'), 2500);
+      setTimeout(() => els.toast.classList.add('translate-y-16', 'opacity-0'), 2400);
     }
 
-    function openLockScreen(setupMode = false) {
-      els.lockErr.classList.add('hidden');
-      els.lockInput.value = '';
-      if (!setupMode && state.requiredPin) {
-        els.lockTitle.textContent = 'Enter Vault PIN to Unlock';
-        els.lockDesc.textContent = 'Enter the PIN to view and download files.';
-        els.lockBtn.textContent = 'Unlock Vault';
-        els.resetBtn.classList.remove('hidden');
-      } else {
-        els.lockTitle.textContent = 'Set Your Private Vault PIN';
-        els.lockDesc.textContent = 'Create a PIN. Anyone opening this link must enter this PIN.';
-        els.lockBtn.textContent = 'Save PIN & Open Vault';
-        els.resetBtn.classList.add('hidden');
-      }
+    function showChoicesScreen() {
+      els.errMsg.classList.add('hidden');
+      els.pinInput.value = '';
+      els.pinFormBox.classList.add('hidden');
+      els.choiceBox.classList.remove('hidden');
       els.overlay.classList.remove('hidden');
     }
 
-    function handleUnlock() {
-      const val = els.lockInput.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
-      if (!val) {
-        els.lockErr.textContent = 'Please enter a PIN.';
-        els.lockErr.classList.remove('hidden');
+    function openPinForm(mode) {
+      state.mode = mode;
+      els.errMsg.classList.add('hidden');
+      els.pinInput.value = '';
+      els.choiceBox.classList.add('hidden');
+      els.pinFormBox.classList.remove('hidden');
+
+      if (mode === 'create') {
+        els.formTitle.textContent = 'Create Your New PIN';
+        els.formDesc.textContent = 'Choose any PIN (e.g. 7860 or MYDOCS) to store your files.';
+        els.submitBtn.textContent = 'Create PIN & Open Vault';
+      } else {
+        els.formTitle.textContent = 'Enter Existing PIN';
+        els.formDesc.textContent = 'Enter the PIN shared with you to view & download files.';
+        els.submitBtn.textContent = 'Unlock & Open Files';
+      }
+      setTimeout(() => els.pinInput.focus(), 50);
+    }
+
+    function handlePinSubmit() {
+      const pin = els.pinInput.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+      if (!pin) {
+        els.errMsg.textContent = 'Please enter a valid PIN.';
+        els.errMsg.classList.remove('hidden');
         return;
       }
-      if (state.requiredPin && !els.resetBtn.classList.contains('hidden') && val !== state.requiredPin) {
-        els.lockErr.textContent = 'Wrong PIN! Try again.';
-        els.lockErr.classList.remove('hidden');
-        els.lockInput.value = '';
-        return;
+
+      if (state.mode === 'create') {
+        if (!createdPins.includes(pin)) {
+          createdPins.push(pin);
+          localStorage.setItem(PINS_LIST_KEY, JSON.stringify(createdPins));
+        }
+        state.activePin = pin;
+        els.headerPinText.textContent = pin;
+        els.inlinePinText.textContent = pin;
+        els.overlay.classList.add('hidden');
+        loadVaultFiles();
+        showToast('New PIN Created: ' + pin);
+      } else {
+        if (!createdPins.includes(pin)) {
+          els.errMsg.textContent = 'PIN not found! Check the PIN or Create a New PIN first.';
+          els.errMsg.classList.remove('hidden');
+          return;
+        }
+        state.activePin = pin;
+        els.headerPinText.textContent = pin;
+        els.inlinePinText.textContent = pin;
+        els.overlay.classList.add('hidden');
+        loadVaultFiles();
+        showToast('Unlocked PIN: ' + pin);
       }
-      state.requiredPin = val;
-      state.vaultPin = val;
-      localStorage.setItem(SAVED_PIN_KEY, val);
-      els.pinInput.value = val;
-      els.inlinePin.textContent = val;
-      els.overlay.classList.add('hidden');
-      loadVaultFiles();
-      showToast('Vault Unlocked (PIN: ' + val + ')');
     }
 
     // IndexedDB Storage
     function openDB() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('SidqonPinVaultDB', 1);
+        const req = indexedDB.open('SidqonTwoOptionVaultDB', 1);
         req.onupgradeneeded = (e) => e.target.result.createObjectStore('files', { keyPath: 'id' });
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -260,7 +277,7 @@
       const req = tx.objectStore('files').getAll();
       req.onsuccess = () => {
         state.files = (req.result || [])
-          .filter(f => f.vaultPin === state.vaultPin)
+          .filter(f => f.vaultPin === state.activePin)
           .sort((a, b) => b.createdAt - a.createdAt);
         renderFiles();
       };
@@ -268,7 +285,7 @@
 
     async function saveFiles(fileList) {
       const files = Array.from(fileList || []);
-      if (!files.length) return;
+      if (!files.length || !state.activePin) return;
       const db = await openDB();
       for (const file of files) {
         const ext = file.name.split('.').pop().toLowerCase();
@@ -279,13 +296,12 @@
 
         const rec = {
           id: 'f-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          vaultPin: state.vaultPin,
+          vaultPin: state.activePin,
           name: file.name,
           size: file.size,
           type: file.type,
           category: cat,
           blob: file,
-          device: deviceLabel,
           createdAt: Date.now()
         };
         await new Promise((res) => {
@@ -295,7 +311,7 @@
         });
       }
       await loadVaultFiles();
-      showToast(files.length + ' file(s) saved to PIN ' + state.vaultPin);
+      showToast(files.length + ' file(s) saved under PIN ' + state.activePin);
     }
 
     async function deleteFile(id) {
@@ -317,13 +333,11 @@
 
     function renderFiles() {
       const counts = { all: state.files.length, image: 0, video: 0, document: 0, other: 0 };
-      let totalSize = 0;
-      state.files.forEach(f => { counts[f.category]++; totalSize += f.size; });
-
+      state.files.forEach(f => counts[f.category]++);
       ['all','image','video','document','other'].forEach(k => {
         document.getElementById('count-' + k).textContent = counts[k];
       });
-      els.statsBadge.textContent = `${counts.all} Files • ${formatBytes(totalSize)}`;
+      els.statsBadge.textContent = counts.all + (counts.all === 1 ? ' File' : ' Files');
 
       const filtered = state.files.filter(f => {
         const cMatch = state.activeCategory === 'all' || f.category === state.activeCategory;
@@ -348,7 +362,7 @@
             <div>
               ${thumb}
               <h3 class="text-sm font-bold text-[#0F172A] truncate">${f.name}</h3>
-              <p class="text-[11px] text-slate-500 mt-1">${formatBytes(f.size)} • From ${f.device}</p>
+              <p class="text-[11px] text-slate-500 mt-1">${formatBytes(f.size)}</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
               <button data-act="dl" data-id="${f.id}" class="flex-1 py-2 px-3 rounded-xl bg-[#10B981] text-white text-xs font-bold cursor-pointer">Download</button>
@@ -360,32 +374,12 @@
     }
 
     // Event Listeners
-    els.lockBtn.addEventListener('click', handleUnlock);
-    els.lockInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleUnlock(); });
-    els.resetBtn.addEventListener('click', () => { state.requiredPin = ''; openLockScreen(true); });
-    els.lockNowBtn.addEventListener('click', () => openLockScreen(false));
-
-    els.setPinBtn.addEventListener('click', () => {
-      const val = els.pinInput.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
-      if (!val) return openLockScreen(true);
-      state.requiredPin = val;
-      state.vaultPin = val;
-      localStorage.setItem(SAVED_PIN_KEY, val);
-      els.inlinePin.textContent = val;
-      loadVaultFiles();
-      showToast('PIN Updated to: ' + val);
-    });
-
-    els.copyBtn.addEventListener('click', () => {
-      const url = window.location.href.split('#')[0].split('?')[0];
-      const ta = document.createElement('textarea');
-      ta.value = url;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Link copied! Share PIN "' + state.vaultPin + '" to unlock.');
-    });
+    els.chooseCreateBtn.addEventListener('click', () => openPinForm('create'));
+    els.chooseEnterBtn.addEventListener('click', () => openPinForm('enter'));
+    els.backToChoicesBtn.addEventListener('click', showChoicesScreen);
+    els.submitBtn.addEventListener('click', handlePinSubmit);
+    els.pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handlePinSubmit(); });
+    els.lockNowBtn.addEventListener('click', showChoicesScreen);
 
     els.selectBtn.addEventListener('click', (e) => { e.stopPropagation(); els.fileInput.click(); });
     els.dropZone.addEventListener('click', () => els.fileInput.click());
@@ -436,7 +430,7 @@
     });
 
     els.closeModal.addEventListener('click', () => { els.modal.classList.add('hidden'); els.modalBody.innerHTML = ''; });
-    openLockScreen(false);
+    showChoicesScreen();
   </script>
 </body>
 </html>
