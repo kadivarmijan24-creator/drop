@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SIDQON DROP — Encrypted Cloud PIN Vault</title>
+  <title>SIDQON DROP — 6-Digit Locked Personal Cloud Vault</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -14,7 +14,9 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- FIRST SCREEN: 2 OPTIONS (CREATE NEW PIN vs ENTER EXISTING PIN) -->
+  <!-- ========================================================================
+       VAULT LOCK SCREEN (2 OPTIONS: CREATE 6-DIGIT PIN vs ENTER EXISTING PIN)
+       ======================================================================== -->
   <div id="vaultLockOverlay" class="fixed inset-0 z-50 bg-[#0F2942] flex items-center justify-center p-4">
     <div class="bg-white border border-[#CBD5E1] rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-[#10B981] text-white flex items-center justify-center shadow-md mb-4">
@@ -24,36 +26,37 @@
         </svg>
       </div>
 
-      <h1 class="text-xl font-extrabold text-[#0F172A]">SIDQON DROP ENCRYPTED VAULT</h1>
-      <p class="text-xs text-slate-500 mt-1">Encrypted Laptop ↔ Phone Cloud Vault</p>
+      <h1 class="text-xl font-extrabold text-[#0F172A]">SIDQON DROP PERSONAL VAULT</h1>
+      <p class="text-xs text-slate-500 mt-1">6-Digit Numeric PIN Protected • Laptop ↔ Phone Cloud</p>
 
       <!-- 2 CHOICE BUTTONS -->
       <div id="choiceButtonsBox" class="mt-6 space-y-3">
         <button id="chooseCreatePinBtn" type="button" onclick="openPinForm('create')"
           class="w-full py-3.5 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
-          + Create New PIN (Upload Files)
+          + Create New 6-Digit PIN (Lock &amp; Upload)
         </button>
 
         <button id="chooseEnterPinBtn" type="button" onclick="openPinForm('enter')"
           class="w-full py-3.5 px-5 rounded-xl bg-[#0F2942] hover:bg-[#1E3A5F] text-white text-sm font-bold shadow-md transition cursor-pointer">
-          Enter Existing PIN (Open &amp; Download)
+          Enter Existing 6-Digit PIN (Unlock Vault)
         </button>
       </div>
 
-      <!-- PIN INPUT FORM -->
+      <!-- 6-DIGIT NUMERIC PIN INPUT FORM -->
       <div id="pinFormBox" class="hidden mt-5">
-        <h2 id="formModeTitle" class="text-base font-extrabold text-[#0F172A]">Enter PIN</h2>
-        <p id="formModeDesc" class="text-xs text-slate-500 mt-1">Type your PIN below</p>
+        <h2 id="formModeTitle" class="text-base font-extrabold text-[#0F172A]">Enter 6-Digit PIN</h2>
+        <p id="formModeDesc" class="text-xs text-slate-500 mt-1">Type your 6-digit numeric PIN below</p>
 
-        <input id="lockPinEntryInput" type="text" maxlength="16" placeholder="Enter PIN (e.g. SIDQON786)"
+        <input id="lockPinEntryInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••••"
+          oninput="this.value = this.value.replace(/\D/g, '').slice(0, 6)"
           onkeydown="if(event.key==='Enter') handlePinSubmit()"
-          class="mt-4 w-full text-center text-xl font-extrabold tracking-[0.2em] uppercase px-4 py-3 rounded-xl border-2 border-[#CBD5E1] focus:border-[#0F2942] focus:outline-none text-[#0F172A]" />
+          class="mt-4 w-full text-center text-2xl font-extrabold tracking-[0.35em] px-4 py-3 rounded-xl border-2 border-[#CBD5E1] focus:border-[#0F2942] focus:outline-none text-[#0F172A]" />
 
         <p id="lockErrorMsg" class="hidden text-xs font-bold text-[#DC2626] mt-2">Error</p>
 
         <button id="lockSubmitBtn" type="button" onclick="handlePinSubmit()"
           class="mt-4 w-full py-3 px-5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-md transition cursor-pointer">
-          Continue
+          Unlock Vault
         </button>
 
         <button id="backToChoicesBtn" type="button" onclick="showChoicesScreen()"
@@ -64,7 +67,9 @@
     </div>
   </div>
 
-  <!-- HEADER -->
+  <!-- ========================================================================
+       TOP HEADER WITH PROMINENT "LOCK VAULT" BUTTON
+       ======================================================================== -->
   <header class="bg-[#0F2942] text-white sticky top-0 z-40 shadow-md">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
@@ -76,24 +81,44 @@
         </div>
         <div>
           <h1 class="text-lg font-extrabold leading-none">SIDQON DROP</h1>
-          <p class="text-xs text-slate-300 mt-1">Active PIN: <strong id="headerPinText" class="text-[#10B981]">----</strong></p>
+          <p class="text-xs text-slate-300 mt-1">Vault PIN: <strong id="headerPinText" class="text-[#10B981]">••••••</strong></p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <!-- TOP RIGHT CONTROLS (LOCK VAULT + LOCK ALL FILES + REFRESH) -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button type="button" onclick="lockAllCurrentFiles()"
+          class="px-3 py-2 rounded-xl bg-[#1E3A5F] hover:bg-slate-700 border border-white/15 text-xs font-bold text-amber-300 flex items-center gap-1.5 cursor-pointer"
+          title="Lock all visible files individually">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Lock All Files</span>
+        </button>
+
         <button type="button" onclick="refreshVaultFiles(true)"
           class="px-3 py-2 rounded-xl bg-[#1E3A5F] hover:bg-slate-700 text-xs font-bold text-slate-200 cursor-pointer">
           ↻ Refresh
         </button>
+
+        <!-- MAIN LOCK VAULT BUTTON AT TOP -->
         <button id="lockVaultNowBtn" type="button" onclick="showChoicesScreen()"
-          class="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold cursor-pointer">
-          Switch PIN
+          class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] text-xs font-extrabold flex items-center gap-1.5 shadow-md cursor-pointer"
+          title="Lock Personal Vault Immediately">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Lock Vault</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN WORKSPACE -->
+  <!-- ========================================================================
+       MAIN PERSONAL VAULT WORKSPACE
+       ======================================================================== -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
     <!-- UPLOAD BOX -->
@@ -101,16 +126,16 @@
       class="bg-white border-2 border-dashed border-[#CBD5E1] hover:border-[#10B981] rounded-2xl p-8 text-center transition-all cursor-pointer shadow-sm">
       <input id="fileInput" type="file" multiple accept="*/*" onchange="uploadFiles(this.files)" class="hidden" />
       <h2 class="text-lg font-bold text-[#0F172A]">Drag &amp; Drop Any Size Files (MB / GB) Here</h2>
-      <p class="text-xs text-slate-500 mt-1">Encrypted &amp; locked under PIN <strong id="inlinePinText" class="text-[#0F2942]">----</strong> • Deleting removes from Firebase &amp; Cloud permanently.</p>
+      <p class="text-xs text-slate-500 mt-1">Encrypted &amp; locked under 6-digit PIN <strong id="inlinePinText" class="text-[#0F2942]">••••••</strong> • Tap <strong>Lock Vault</strong> at the top anytime to lock screen.</p>
       <button id="selectFilesBtn" type="button" onclick="event.stopPropagation(); document.getElementById('fileInput').click()"
         class="mt-4 px-5 py-2.5 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold shadow-sm cursor-pointer">
-        + Select Files to Upload
+        + Select Files to Lock &amp; Upload
       </button>
 
       <!-- Progress -->
       <div id="uploadProgressWrap" class="hidden mt-5 max-w-md mx-auto bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl p-3.5 text-left" onclick="event.stopPropagation()">
         <div class="flex justify-between text-xs font-bold mb-1">
-          <span id="uploadFileName" class="truncate pr-2">Uploading...</span>
+          <span id="uploadFileName" class="truncate pr-2">Encrypting &amp; Uploading...</span>
           <span id="uploadPercent" class="text-[#10B981]">0%</span>
         </div>
         <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
@@ -129,7 +154,7 @@
         <button type="button" data-cat="document" onclick="setCategory('document')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Documents (<span id="count-document">0</span>)</button>
         <button type="button" data-cat="other" onclick="setCategory('other')" class="cat-tab px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-[#CBD5E1] cursor-pointer">Other / ZIP (<span id="count-other">0</span>)</button>
       </div>
-      <input id="searchInput" type="text" oninput="state.searchQuery=this.value; renderFiles();" placeholder="Search files..."
+      <input id="searchInput" type="text" oninput="state.searchQuery=this.value; renderFiles();" placeholder="Search personal vault..."
         class="w-full md:w-72 px-4 py-2 bg-white border border-[#CBD5E1] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0F2942]" />
     </section>
 
@@ -137,8 +162,8 @@
     <section id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></section>
 
     <div id="emptyState" class="bg-white border border-[#CBD5E1] rounded-2xl p-12 text-center">
-      <h3 class="text-base font-bold text-[#0F172A]">No Files Under This PIN Yet</h3>
-      <p class="text-xs text-slate-500 mt-1">Upload files from your laptop and enter this exact PIN on your phone anytime.</p>
+      <h3 class="text-base font-bold text-[#0F172A]">Your Personal Vault is Empty</h3>
+      <p class="text-xs text-slate-500 mt-1">Upload files from your laptop and unlock them anytime on your phone using your 6-digit PIN.</p>
     </div>
   </main>
 
@@ -146,7 +171,7 @@
   <div id="previewModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white border border-[#CBD5E1] rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="px-5 py-3.5 bg-[#0F2942] text-white flex items-center justify-between gap-3">
-        <h3 id="modalFileName" class="text-sm font-bold truncate">Preview</h3>
+        <h3 id="modalFileName" class="text-sm font-bold truncate">Decrypted Preview</h3>
         <div class="flex items-center gap-2">
           <button id="modalDownloadBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-[#10B981] text-white text-xs font-bold cursor-pointer">Download / Save</button>
           <button type="button" onclick="closePreviewModal()" class="w-8 h-8 rounded-lg bg-white/10 text-white font-bold cursor-pointer">&times;</button>
@@ -166,14 +191,15 @@
     // YOUR FIREBASE REALTIME DATABASE URL (drop-a997b)
     // =========================================================================
     const FIREBASE_DB_URL = "https://drop-a997b-default-rtdb.asia-southeast1.firebasedatabase.app";
-    const DIRECT_CHUNK_LIMIT = 8 * 1024 * 1024; // <= 8 MB stored directly in Firebase chunks
-    const CHUNK_CHAR_SIZE = 400000;
+    const DIRECT_CHUNK_LIMIT = 12 * 1024 * 1024; // <= 12 MB direct parallel Firebase upload
+    const CHUNK_CHAR_SIZE = 1500000;
 
     const state = {
       mode: 'create',
       activePin: '',
       vaultKey: '',
       files: [],
+      lockedIds: new Set(),
       activeCategory: 'all',
       searchQuery: '',
       pollTimer: null
@@ -183,10 +209,9 @@
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').textContent = msg;
       t.classList.remove('translate-y-16', 'opacity-0');
-      setTimeout(() => t.classList.add('translate-y-16', 'opacity-0'), 3000);
+      setTimeout(() => t.classList.add('translate-y-16', 'opacity-0'), 2800);
     }
 
-    // Fast deterministic PIN hash (works everywhere: file://, http://, https://)
     function makeVaultKey(pin) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
       const str = "SIDQON_SECURE_" + pin;
@@ -200,16 +225,25 @@
       return "V_" + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
     }
 
-    // Fast Stream Cipher Encryption/Decryption with user PIN (works on all protocols)
-    function cipherBytes(uint8Array, pin) {
+    // Fast 32-bit Word-Level Encryption/Decryption with User 6-Digit PIN
+    function cipherBytesFast(uint8Array, pin) {
       const keyBytes = new TextEncoder().encode("SIDQON_KEY_" + pin + "_VAULT");
       const out = new Uint8Array(uint8Array.length);
       let s = 0x9e3779b9;
       for (let k = 0; k < keyBytes.length; k++) {
         s = (Math.imul(s ^ keyBytes[k], 0x85ebca6b) >>> 0);
       }
-      for (let i = 0; i < uint8Array.length; i++) {
-        s = (Math.imul(s ^ (i & 0xff), 0xc2b2ae35) + keyBytes[i % keyBytes.length]) >>> 0;
+      const len4 = uint8Array.length & ~3;
+      const inView = new DataView(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
+      const outView = new DataView(out.buffer);
+      const kLen = keyBytes.length;
+
+      for (let i = 0; i < len4; i += 4) {
+        s = (Math.imul(s ^ (i & 0xffff), 0xc2b2ae35) + keyBytes[(i >> 2) % kLen]) >>> 0;
+        outView.setUint32(i, inView.getUint32(i, true) ^ s, true);
+      }
+      for (let i = len4; i < uint8Array.length; i++) {
+        s = (Math.imul(s ^ (i & 0xff), 0xc2b2ae35) + keyBytes[i % kLen]) >>> 0;
         out[i] = uint8Array[i] ^ ((s >>> 16) & 0xff);
       }
       return out;
@@ -234,10 +268,16 @@
     }
 
     // =========================================================================
-    // 2-OPTION LOCK SCREEN CONTROLS
+    // LOCK VAULT & STRICT 6-DIGIT NUMERIC PIN ENTRY
     // =========================================================================
     function showChoicesScreen() {
       if (state.pollTimer) clearInterval(state.pollTimer);
+      state.activePin = '';
+      state.vaultKey = '';
+      state.files = [];
+      renderFiles();
+      document.getElementById('headerPinText').textContent = '••••••';
+      document.getElementById('inlinePinText').textContent = '••••••';
       document.getElementById('lockErrorMsg').classList.add('hidden');
       document.getElementById('lockPinEntryInput').value = '';
       document.getElementById('pinFormBox').classList.add('hidden');
@@ -255,13 +295,13 @@
       document.getElementById('pinFormBox').classList.remove('hidden');
 
       if (mode === 'create') {
-        document.getElementById('formModeTitle').textContent = 'Create New PIN';
-        document.getElementById('formModeDesc').textContent = 'Set a strong PIN (e.g. SIDQON786) to encrypt & upload files.';
-        document.getElementById('lockSubmitBtn').textContent = 'Create PIN & Open Vault';
+        document.getElementById('formModeTitle').textContent = 'Create New 6-Digit PIN';
+        document.getElementById('formModeDesc').textContent = 'Set an exact 6-digit numeric PIN (e.g. 786012) to lock files.';
+        document.getElementById('lockSubmitBtn').textContent = 'Create 6-Digit PIN & Open Vault';
       } else {
-        document.getElementById('formModeTitle').textContent = 'Enter Existing PIN';
-        document.getElementById('formModeDesc').textContent = 'Enter your PIN to unlock & download your files.';
-        document.getElementById('lockSubmitBtn').textContent = 'Unlock & Load Files';
+        document.getElementById('formModeTitle').textContent = 'Enter Existing 6-Digit PIN';
+        document.getElementById('formModeDesc').textContent = 'Enter your 6-digit numeric PIN to unlock & download files.';
+        document.getElementById('lockSubmitBtn').textContent = 'Unlock Vault';
       }
       setTimeout(() => input.focus(), 50);
     }
@@ -270,16 +310,16 @@
       const input = document.getElementById('lockPinEntryInput');
       const err = document.getElementById('lockErrorMsg');
       const btn = document.getElementById('lockSubmitBtn');
-      const pin = input.value.trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+      const pin = input.value.replace(/\D/g, '');
 
-      if (!pin || pin.length < 3) {
-        err.textContent = 'Please enter a valid PIN (at least 3 characters).';
+      if (pin.length !== 6) {
+        err.textContent = 'Please enter an exact 6-digit numeric PIN (0-9).';
         err.classList.remove('hidden');
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = 'Connecting...';
+      btn.textContent = 'Unlocking...';
       err.classList.add('hidden');
 
       try {
@@ -298,10 +338,10 @@
           }
         } else {
           if (!existing) {
-            err.textContent = 'PIN not found! Create this PIN on Laptop first.';
+            err.textContent = 'Incorrect PIN! Create this 6-digit PIN on Laptop first.';
             err.classList.remove('hidden');
             btn.disabled = false;
-            btn.textContent = 'Unlock & Load Files';
+            btn.textContent = 'Unlock Vault';
             return;
           }
         }
@@ -314,20 +354,40 @@
 
         await refreshVaultFiles(false);
         if (state.pollTimer) clearInterval(state.pollTimer);
-        state.pollTimer = setInterval(() => refreshVaultFiles(false), 5000);
-        showToast('Vault Unlocked (PIN: ' + pin + ')');
+        state.pollTimer = setInterval(() => refreshVaultFiles(false), 6000);
+        showToast('Personal Vault Unlocked');
       } catch (e) {
-        console.error(e);
         err.textContent = 'Connection failed. Check internet & try again.';
         err.classList.remove('hidden');
       } finally {
         btn.disabled = false;
-        btn.textContent = state.mode === 'create' ? 'Create PIN & Open Vault' : 'Unlock & Load Files';
+        btn.textContent = state.mode === 'create' ? 'Create 6-Digit PIN & Open Vault' : 'Unlock Vault';
       }
     }
 
+    function lockAllCurrentFiles() {
+      if (!state.files.length) {
+        showChoicesScreen();
+        return;
+      }
+      state.files.forEach(f => state.lockedIds.add(f.id));
+      renderFiles();
+      showToast('All files locked! Tap Unlock on any file or Lock Vault at top.');
+    }
+
+    function toggleSingleFileLock(id) {
+      if (state.lockedIds.has(id)) {
+        state.lockedIds.delete(id);
+        showToast('File unlocked');
+      } else {
+        state.lockedIds.add(id);
+        showToast('File locked');
+      }
+      renderFiles();
+    }
+
     // =========================================================================
-    // LOAD, UPLOAD, DECRYPT & PERMANENT DELETE
+    // LOAD, ENCRYPTED UPLOAD, DECRYPTED DOWNLOAD & PERMANENT DELETE
     // =========================================================================
     async function refreshVaultFiles(notify = false) {
       if (!state.vaultKey) return;
@@ -338,9 +398,7 @@
         state.files = list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         renderFiles();
         if (notify) showToast('Vault refreshed');
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) {}
     }
 
     function uploadEncryptedBlobToCloud(blob, filename, onProgress) {
@@ -411,31 +469,40 @@
         else if (file.type.includes('pdf') || ['pdf','doc','docx','xls','xlsx','txt'].includes(ext)) cat = 'document';
 
         nameEl.textContent = file.name;
-        pctEl.textContent = '10%';
-        barEl.style.width = '10%';
-        subEl.textContent = `Encrypting ${file.name} with PIN...`;
+        pctEl.textContent = '15%';
+        barEl.style.width = '15%';
+        subEl.textContent = `Locking & encrypting ${file.name}...`;
 
         try {
           const rawBuf = await file.arrayBuffer();
-          const encryptedBytes = cipherBytes(new Uint8Array(rawBuf), state.activePin);
+          const encryptedBytes = cipherBytesFast(new Uint8Array(rawBuf), state.activePin);
           const fileId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
 
           if (encryptedBytes.length <= DIRECT_CHUNK_LIMIT) {
             const b64 = bufferToBase64(encryptedBytes);
             const totalChunks = Math.ceil(b64.length / CHUNK_CHAR_SIZE);
+            let completed = 0;
 
+            subEl.textContent = `Uploading ${totalChunks} encrypted part(s)...`;
+
+            const uploadPromises = [];
             for (let i = 0; i < totalChunks; i++) {
               const slice = b64.slice(i * CHUNK_CHAR_SIZE, (i + 1) * CHUNK_CHAR_SIZE);
-              await fetch(`${FIREBASE_DB_URL}/sidqon_chunks/${state.vaultKey}/${fileId}/c_${i}.json`, {
+              const req = fetch(`${FIREBASE_DB_URL}/sidqon_chunks/${state.vaultKey}/${fileId}/c_${i}.json`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(slice)
+              }).then(res => {
+                if (!res.ok) throw new Error('Chunk upload failed');
+                completed++;
+                const pct = Math.round((completed / totalChunks) * 80) + 15;
+                pctEl.textContent = pct + '%';
+                barEl.style.width = pct + '%';
               });
-              const pct = Math.round(((i + 1) / totalChunks) * 85) + 15;
-              pctEl.textContent = pct + '%';
-              barEl.style.width = pct + '%';
-              subEl.textContent = `Uploading part ${i + 1}/${totalChunks} to Firebase...`;
+              uploadPromises.push(req);
             }
+
+            await Promise.all(uploadPromises);
 
             await fetch(`${FIREBASE_DB_URL}/sidqon_files/${state.vaultKey}/${fileId}.json`, {
               method: 'PUT',
@@ -450,12 +517,14 @@
                 createdAt: Date.now()
               })
             });
+            pctEl.textContent = '100%';
+            barEl.style.width = '100%';
           } else {
             const encBlob = new Blob([encryptedBytes], { type: 'application/octet-stream' });
             const cloudMeta = await uploadEncryptedBlobToCloud(encBlob, file.name, (pct, loaded, total) => {
               pctEl.textContent = pct + '%';
               barEl.style.width = pct + '%';
-              subEl.textContent = `Uploading large file: ${formatBytes(loaded)} / ${formatBytes(total)}`;
+              subEl.textContent = `Uploading encrypted file: ${formatBytes(loaded)} / ${formatBytes(total)}`;
             });
 
             await fetch(`${FIREBASE_DB_URL}/sidqon_files/${state.vaultKey}/${fileId}.json`, {
@@ -484,7 +553,7 @@
       document.getElementById('fileInput').value = '';
       if (uploadedCount > 0) {
         await refreshVaultFiles(false);
-        showToast(`${uploadedCount} file(s) encrypted & uploaded!`);
+        showToast(`${uploadedCount} file(s) locked & saved!`);
       }
     }
 
@@ -508,13 +577,14 @@
         encryptedBytes = new Uint8Array(await res.arrayBuffer());
       }
 
-      const plainBytes = cipherBytes(encryptedBytes, state.activePin);
+      const plainBytes = cipherBytesFast(encryptedBytes, state.activePin);
       const blob = new Blob([plainBytes], { type: file.type || 'application/octet-stream' });
       file.cachedUrl = URL.createObjectURL(blob);
       return file.cachedUrl;
     }
 
     async function downloadFileById(id) {
+      if (state.lockedIds.has(id)) return;
       const file = state.files.find(f => f.id === id);
       if (!file) return;
       showToast('Decrypting ' + file.name + '...');
@@ -537,6 +607,7 @@
     }
 
     async function viewFileById(id) {
+      if (state.lockedIds.has(id)) return;
       const file = state.files.find(f => f.id === id);
       if (!file) return;
       const modal = document.getElementById('previewModal');
@@ -566,16 +637,16 @@
     async function deleteFileById(id) {
       const file = state.files.find(f => f.id === id);
       if (!file) return;
-      showToast('Deleting from Firebase & Cloud...');
+      showToast('Deleting permanently from Firebase & Cloud...');
 
       try {
-        // 1. Delete Metadata & Chunks from Firebase
-        await fetch(`${FIREBASE_DB_URL}/sidqon_files/${state.vaultKey}/${id}.json`, { method: 'DELETE' });
-        if (file.storageType === 'firebase') {
-          await fetch(`${FIREBASE_DB_URL}/sidqon_chunks/${state.vaultKey}/${id}.json`, { method: 'DELETE' });
-        }
+        await Promise.all([
+          fetch(`${FIREBASE_DB_URL}/sidqon_files/${state.vaultKey}/${id}.json`, { method: 'DELETE' }),
+          file.storageType === 'firebase'
+            ? fetch(`${FIREBASE_DB_URL}/sidqon_chunks/${state.vaultKey}/${id}.json`, { method: 'DELETE' })
+            : Promise.resolve()
+        ]);
 
-        // 2. Delete from Gofile Cloud Server
         if (file.storageType === 'cloud' && file.cloudMeta?.guestToken && file.cloudMeta?.fileId) {
           await fetch('https://api.gofile.io/contents', {
             method: 'DELETE',
@@ -588,6 +659,7 @@
         }
 
         if (file.cachedUrl) URL.revokeObjectURL(file.cachedUrl);
+        state.lockedIds.delete(id);
         await refreshVaultFiles(false);
         showToast('Permanently deleted from all servers!');
       } catch (e) {
@@ -636,26 +708,35 @@
       }
       empty.classList.add('hidden');
 
-      grid.innerHTML = filtered.map(f => `
-        <div class="bg-white border border-[#CBD5E1] rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-[#059669] text-[10px] font-extrabold uppercase">LOCKED</span>
-              <span class="text-xs font-extrabold text-[#0F2942]">${formatBytes(f.size)}</span>
+      grid.innerHTML = filtered.map(f => {
+        const isLocked = state.lockedIds.has(f.id);
+        return `
+          <div class="bg-white border ${isLocked ? 'border-amber-400 bg-amber-50/20' : 'border-[#CBD5E1]'} rounded-2xl p-4 flex flex-col justify-between shadow-sm">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2 py-0.5 rounded-md ${isLocked ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-[#059669]'} text-[10px] font-extrabold uppercase">
+                  ${isLocked ? 'FILE LOCKED' : 'ENCRYPTED'}
+                </span>
+                <span class="text-xs font-extrabold text-[#0F2942]">${formatBytes(f.size)}</span>
+              </div>
+              <h3 class="text-sm font-bold text-[#0F172A] break-all">${f.name}</h3>
+              <p class="text-[11px] text-slate-500 mt-1">${isLocked ? 'Locked on screen • Tap Unlock to view' : (f.storageType === 'cloud' ? 'Encrypted Cloud File' : 'Encrypted Firebase File')}</p>
             </div>
-            <h3 class="text-sm font-bold text-[#0F172A] break-all">${f.name}</h3>
-            <p class="text-[11px] text-slate-500 mt-1">${f.storageType === 'cloud' ? 'Encrypted Cloud File' : 'Encrypted Firebase File'}</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+              ${
+                isLocked
+                  ? `<button type="button" onclick="toggleSingleFileLock('${f.id}')" class="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] text-xs font-extrabold cursor-pointer">Unlock File</button>`
+                  : `<button type="button" onclick="downloadFileById('${f.id}')" class="flex-1 py-2 px-3 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold cursor-pointer">Download</button>
+                     <button type="button" onclick="viewFileById('${f.id}')" class="py-2 px-2.5 rounded-xl bg-[#E2E8F0] text-[#1E293B] text-xs font-bold cursor-pointer">View</button>
+                     <button type="button" onclick="toggleSingleFileLock('${f.id}')" class="py-2 px-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold cursor-pointer" title="Lock this file">Lock</button>`
+              }
+              <button type="button" onclick="deleteFileById('${f.id}')" class="py-2 px-2.5 rounded-xl bg-[#FEE2E2] text-[#DC2626] text-xs font-bold cursor-pointer">Del</button>
+            </div>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-            <button type="button" onclick="downloadFileById('${f.id}')" class="flex-1 py-2 px-3 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold cursor-pointer">Download</button>
-            <button type="button" onclick="viewFileById('${f.id}')" class="py-2 px-3 rounded-xl bg-[#E2E8F0] text-[#1E293B] text-xs font-bold cursor-pointer">View</button>
-            <button type="button" onclick="deleteFileById('${f.id}')" class="py-2 px-2.5 rounded-xl bg-[#FEE2E2] text-[#DC2626] text-xs font-bold cursor-pointer">Del</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    // Drag & Drop handlers
     const dz = document.getElementById('dropZone');
     ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dropzone-active'); }));
     ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dropzone-active'); }));
